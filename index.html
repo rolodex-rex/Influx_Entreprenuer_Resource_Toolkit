@@ -12,17 +12,30 @@
         .pill { font-size: 0.65rem; padding: 2px 8px; border-radius: 9999px; font-weight: 900; text-transform: uppercase; border: 2px solid #000; width: fit-content; min-height: 20px; display: inline-block; }
         .btn-top { background: #1e3a8a; font-weight: 900; color: white; border: 3px solid #000; box-shadow: 4px 4px 0px #000; }
         .btn-active { background: #facc15 !important; color: #000 !important; }
-        .btn-tool { background: #facc15; color: #000; font-weight: 900; padding: 12px; border: 3px solid #000; box-shadow: 4px 4px 0px #000; }
+        .btn-tool { background: #facc15; color: #000; font-weight: 900; padding: 12px; border: 3px solid #000; box-shadow: 4px 4px 0px #000; cursor: pointer; }
         .text-shadow-hard { text-shadow: 2px 2px 0px #000; }
         .text-shadow-hero { text-shadow: 6px 6px 0px #000; }
         .upvote-shadow { filter: drop-shadow(3px 3px 0px #000); }
         .search-yellow::placeholder { color: #facc15; opacity: 1; }
+        
+        /* Custom file input styling */
+        input[type="file"]::file-selector-button { border: 2px solid #000; background: #facc15; font-weight: 900; color: #000; padding: 8px 12px; cursor: pointer; margin-right: 10px; }
     </style>
 </head>
 <body class="p-4 md:p-8 lg:p-12">
 
     <div class="max-w-7xl mx-auto">
-        <div id="clubhouseModal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center p-4">
+        <!-- Message Box Modal (Replaces Alert) -->
+        <div id="msgBoxModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
+            <div class="bg-[#1e3a8a] border-4 border-black p-8 max-w-sm w-full shadow-[12px_12px_0px_0px_#000] text-center">
+                <h2 class="text-3xl font-black text-yellow-400 mb-4 text-shadow-hard">ATTENTION</h2>
+                <p id="msgBoxText" class="text-white font-bold mb-6 text-lg"></p>
+                <button onclick="document.getElementById('msgBoxModal').classList.add('hidden')" class="btn-tool px-8 hover:bg-yellow-500">UNDERSTOOD</button>
+            </div>
+        </div>
+
+        <!-- Clubhouse Modal -->
+        <div id="clubhouseModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
             <div class="bg-[#1e3a8a] border-4 border-black p-8 max-w-sm w-full shadow-[12px_12px_0px_0px_#000]">
                 <h2 class="text-3xl font-black text-yellow-400 mb-6 text-shadow-hard">👋 CLUBHOUSE</h2>
                 <button onclick="window.open(localStorage.getItem('chLink') || 'https://clubhouse.com', '_blank')" class="w-full bg-yellow-400 p-4 border-2 border-black font-black mb-4 text-black text-xl hover:bg-yellow-500">VISIT ROOM</button>
@@ -31,13 +44,44 @@
             </div>
         </div>
 
+        <!-- Add Tool Modal -->
+        <div id="addToolModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-[#1e3a8a] border-4 border-black p-8 max-w-lg w-full shadow-[12px_12px_0px_0px_#000] mt-10">
+                <h2 class="text-3xl font-black text-yellow-400 mb-6 text-shadow-hard">ADD NEW TOOL</h2>
+                
+                <input type="text" id="newToolName" placeholder="TOOL NAME" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none">
+                
+                <select id="newToolCatSelect" onchange="toggleCustomCat()" class="w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none">
+                    <option value="">SELECT CATEGORY...</option>
+                    <option value="CUSTOM_NEW">--- CREATE NEW CATEGORY ---</option>
+                    <!-- Populated dynamically -->
+                </select>
+                <input type="text" id="newToolCatCustom" placeholder="NEW CATEGORY NAME" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none hidden">
+                
+                <input type="text" id="newToolLink" placeholder="URL LINK (https://...)" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none">
+                
+                <textarea id="newToolDesc" placeholder="DESCRIPTION (At least 2 sentences recommended)..." class="w-full bg-[#0f172a] p-3 mb-4 text-white font-black border-2 border-black h-24 focus:outline-none"></textarea>
+                
+                <div class="flex items-center gap-2 mb-6 text-white font-black">
+                    <input type="checkbox" id="newToolOS" class="w-5 h-5 accent-yellow-400">
+                    <label for="newToolOS">IS OPEN SOURCE?</label>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="submitNewTool()" class="flex-1 bg-yellow-400 p-3 border-2 border-black font-black text-black hover:bg-yellow-500">ADD TOOL</button>
+                    <button onclick="document.getElementById('addToolModal').classList.add('hidden')" class="bg-red-500 p-3 border-2 border-black font-black text-white hover:bg-red-600">CANCEL</button>
+                </div>
+            </div>
+        </div>
+
         <header class="mb-12">
             <h1 class="text-5xl md:text-7xl font-black text-yellow-400 leading-none text-shadow-hero mb-6">INFLUX ENTREPRENEUR<br>TOOLKIT</h1>
             <div class="flex flex-wrap gap-3">
                 <button id="btnToolkit" onclick="setTab('toolkit')" class="btn-top px-6 py-3 btn-active">TOOLKIT</button>
                 <button id="btnForum" onclick="setTab('forum')" class="btn-top px-6 py-3">FORUM</button>
+                <button onclick="document.getElementById('addToolModal').classList.remove('hidden')" class="btn-top px-6 py-3 text-yellow-400">ADD NEW TOOL</button>
                 <button onclick="document.getElementById('clubhouseModal').classList.remove('hidden')" class="btn-top px-6 py-3 text-4xl">👋</button>
-                <a href="https://influxentrepreneur.com" target="_blank" class="btn-top px-6 py-3">INFLUX ENTREPRENEUR</a>
+                <a href="https://influxentrepreneur.com" target="_blank" class="btn-top px-6 py-3 flex items-center">INFLUX ENTREPRENEUR</a>
             </div>
         </header>
 
@@ -46,20 +90,35 @@
                 <input type="text" id="searchInput" onkeyup="renderTools()" placeholder="SEARCH TOOLS..." class="search-yellow flex-1 bg-[#1e3a8a] border-2 border-black p-4 text-yellow-400 font-black shadow-[4px_4px_0px_0px_#000] focus:outline-none" style="color: #facc15;">
                 <select id="categoryFilter" onchange="renderTools()" class="bg-[#1e3a8a] border-2 border-black p-4 text-yellow-400 font-black shadow-[4px_4px_0px_0px_#000] focus:outline-none" style="color: #facc15;">
                     <option value="All">ALL CATEGORIES</option>
+                    <option value="Newly Added">--- NEWLY ADDED ---</option>
                 </select>
             </div>
             <div id="toolGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
-        <div id="forumSection" class="hidden max-w-3xl">
-            <div class="bg-[#1e3a8a] p-8 border-2 border-black shadow-[8px_8px_0px_0px_#000] mb-8">
+        <div id="forumSection" class="hidden">
+            <div class="bg-[#1e3a8a] p-8 border-2 border-black shadow-[8px_8px_0px_0px_#000] mb-8 max-w-4xl">
                 <h2 class="text-2xl font-black text-yellow-400 mb-4 text-shadow-hard">START NEW THREAD</h2>
-                <input id="threadUsername" placeholder="YOUR USERNAME" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none" style="color: #facc15;">
-                <input id="threadTitle" placeholder="TOPIC TITLE" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none" style="color: #facc15;">
+                <input id="threadUsername" placeholder="YOUR USERNAME" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none">
+                <input id="threadTitle" placeholder="TOPIC TITLE" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none">
                 <textarea id="commentText" placeholder="YOUR CONTENT..." class="w-full bg-[#0f172a] p-3 mb-4 text-white font-black border-2 border-black h-24 focus:outline-none"></textarea>
+                
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <div class="flex-1">
+                        <label class="block text-yellow-400 font-black mb-1 text-sm">ATTACH MEDIA (IMG/AUDIO):</label>
+                        <input type="file" id="threadFile" accept="image/*, audio/*" class="w-full text-white font-bold bg-[#0f172a] border-2 border-black">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-yellow-400 font-black mb-1 text-sm">REFERENCE A TOOL:</label>
+                        <select id="threadToolRef" class="w-full bg-[#0f172a] p-2 text-yellow-400 font-black border-2 border-black focus:outline-none">
+                            <option value="">NO TOOL REFERENCED</option>
+                        </select>
+                    </div>
+                </div>
+
                 <button onclick="addThread()" class="btn-tool w-full text-center hover:bg-yellow-500">CREATE THREAD</button>
             </div>
-            <div id="threadList" class="space-y-6"></div>
+            <div id="threadList" class="space-y-6 max-w-5xl"></div>
         </div>
 
         <footer class="mt-20 pt-10 border-t-2 border-black text-center">
@@ -73,6 +132,7 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- CORE TOOLS LIST (All 85+ Preserved & Updated) ---
         const tools = [
             { name: "CLAUDE COWORK", cat: "AGENTIC FRAMEWORKS", desc: "A personal AI operating system utilizing custom skills and MCP servers to fully automate workflows and act as a maintained workspace.", os: false, link: "https://google.com/search?q=CLAUDE+COWORK" },
             { name: "School Skill", cat: "SKILLS & MCP SERVERS", desc: "A custom skill used to fully automate school operations, acting as a maintained 'room' inside a personal OS.", os: false, link: "https://google.com/search?q=School+Skill+Automation" },
@@ -176,14 +236,31 @@
             { name: "INTERACTIVE CLAUDE FULL COURSE", cat: "EDUCATIONAL RESOURCES", desc: "A comprehensive 4-hour video masterclass explaining how to build, automate, and sell a personal AI operating system.", os: false, link: "https://youtu.be/KTEe5705RHw" }
         ];
 
-        window.toolVotes = {};
-        window.forumThreads = [];
+        // Custom Tools Array
+        window.addedTools = JSON.parse(localStorage.getItem('fallback_added_tools') || '[]');
+        window.toolVotes = JSON.parse(localStorage.getItem('fallback_votes') || '{}');
+        window.forumThreads = JSON.parse(localStorage.getItem('fallback_forum') || '[]');
         
         let currentUser = null;
         let db, auth, appId;
         let useCloud = false;
 
-        // Initialize Real-Time Database Connection
+        // Custom Message Alert Helper
+        window.showMsg = function(msg) {
+            document.getElementById('msgBoxText').innerText = msg;
+            document.getElementById('msgBoxModal').classList.remove('hidden');
+        };
+
+        // File to Base64 Helper
+        const getBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
         try {
             if (typeof __firebase_config !== 'undefined') {
                 const firebaseConfig = JSON.parse(__firebase_config);
@@ -205,16 +282,23 @@
                 onAuthStateChanged(auth, (user) => {
                     currentUser = user;
                     if (user) {
+                        // Watch Tool Votes
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'tool_votes'), (snapshot) => {
                             snapshot.docs.forEach(d => { window.toolVotes[d.id] = d.data().votes || 0; });
                             window.renderTools();
-                        }, (e) => console.error(e));
-                        
+                        });
+                        // Watch Custom Added Tools
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'custom_tools'), (snapshot) => {
+                            window.addedTools = snapshot.docs.map(d => d.data());
+                            window.renderTools();
+                            window.populateToolDropdowns();
+                        });
+                        // Watch Forum Threads
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads'), (snapshot) => {
                             window.forumThreads = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                             window.forumThreads.sort((a, b) => b.createdAt - a.createdAt);
                             window.renderForum();
-                        }, (e) => console.error(e));
+                        });
                     }
                 });
             }
@@ -222,19 +306,85 @@
             console.warn("Cloud infrastructure not found. Using local session data.");
         }
 
+        // Add New Tool Logic
+        window.toggleCustomCat = function() {
+            const sel = document.getElementById('newToolCatSelect');
+            const cust = document.getElementById('newToolCatCustom');
+            if(sel.value === 'CUSTOM_NEW') {
+                cust.classList.remove('hidden');
+            } else {
+                cust.classList.add('hidden');
+                cust.value = '';
+            }
+        };
+
+        window.submitNewTool = async function() {
+            const name = document.getElementById('newToolName').value.trim();
+            const desc = document.getElementById('newToolDesc').value.trim();
+            let cat = document.getElementById('newToolCatSelect').value;
+            const customCat = document.getElementById('newToolCatCustom').value.trim();
+            let link = document.getElementById('newToolLink').value.trim();
+            const isOS = document.getElementById('newToolOS').checked;
+
+            if(!name || !desc) { showMsg("Tool Name and Description are required."); return; }
+            if(cat === 'CUSTOM_NEW' && !customCat) { showMsg("Please enter a Custom Category Name."); return; }
+            if(cat === 'CUSTOM_NEW') { cat = customCat.toUpperCase(); }
+            if(!link) link = "https://google.com/search?q=" + encodeURIComponent(name);
+
+            const newTool = { name, desc, cat, link, os: isOS, isNew: true, addedAt: Date.now() };
+
+            if(useCloud && currentUser) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'custom_tools'), newTool);
+                } catch(e) { console.error(e); }
+            } else {
+                window.addedTools.unshift(newTool);
+                localStorage.setItem('fallback_added_tools', JSON.stringify(window.addedTools));
+                window.renderTools();
+                window.populateToolDropdowns();
+            }
+
+            document.getElementById('addToolModal').classList.add('hidden');
+            // reset fields
+            document.getElementById('newToolName').value = '';
+            document.getElementById('newToolDesc').value = '';
+            document.getElementById('newToolLink').value = '';
+            document.getElementById('newToolCatSelect').value = '';
+            document.getElementById('newToolCatCustom').value = '';
+            document.getElementById('newToolCatCustom').classList.add('hidden');
+            document.getElementById('newToolOS').checked = false;
+            
+            showMsg("Tool Added Successfully!");
+        };
+
+        // Render Tool Cards
         window.renderTools = function() {
+            const allTools = [...tools, ...window.addedTools];
             const grid = document.getElementById('toolGrid');
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const cat = document.getElementById('categoryFilter').value;
+            const filterCat = document.getElementById('categoryFilter').value;
             
-            grid.innerHTML = tools.filter(t => (cat === 'All' || t.cat === cat) && (t.name.toLowerCase().includes(search))).map((t) => {
+            const localVoted = JSON.parse(localStorage.getItem('my_votes') || '{}');
+            
+            let filtered = allTools.filter(t => t.name.toLowerCase().includes(search));
+            
+            if(filterCat === 'Newly Added') {
+                filtered = filtered.filter(t => t.isNew);
+            } else if(filterCat !== 'All') {
+                filtered = filtered.filter(t => t.cat === filterCat);
+            }
+
+            grid.innerHTML = filtered.map((t) => {
                 const safeId = t.name.replace(/[^a-zA-Z0-9]/g, '_');
                 const votes = window.toolVotes[safeId] || 0;
-                const idx = tools.findIndex(x => x.name === t.name);
+                const hasVoted = localVoted[safeId] ? true : false;
+                
+                // We need to pass the real exact name to vote so it can find it across arrays safely
+                const encodedName = encodeURIComponent(t.name).replace(/'/g, "%27");
 
                 return `
                 <div class="tool-card p-5 relative">
-                    <button onclick="vote(${idx})" class="absolute top-4 right-4 text-white font-black text-3xl upvote-shadow z-10 hover:scale-110 transition-transform ${votes > 0 ? 'text-red-500' : ''}">♥ <span class="text-xl">${votes}</span></button>
+                    <button onclick="vote('${encodedName}')" class="absolute top-4 right-4 font-black text-3xl upvote-shadow z-10 transition-transform ${hasVoted ? 'text-red-500 cursor-not-allowed' : 'text-white hover:scale-110'}">♥ <span class="text-xl text-white">${votes}</span></button>
                     <div class="flex flex-col gap-2 mb-4 h-12 pr-16">
                         <span class="pill bg-yellow-400 text-black border-black">${t.cat}</span>
                         ${t.os ? '<span class="pill bg-[#5b21b6] text-white border-black">OPEN SOURCE</span>' : '<span class="pill bg-[#1e3a8a] border-black opacity-0"></span>'}
@@ -246,15 +396,35 @@
             `}).join('');
         };
 
-        window.vote = async function(idx) {
-            const t = tools[idx];
-            const safeId = t.name.replace(/[^a-zA-Z0-9]/g, '_');
+        // Render Miniature Tool Card for Forum
+        window.renderMiniToolCard = function(toolName) {
+            if(!toolName) return '';
+            const allTools = [...tools, ...window.addedTools];
+            const t = allTools.find(x => x.name === toolName);
+            if(!t) return '';
             
-            // Optimistic UI Update
+            return `
+            <div class="bg-[#0f172a] border-2 border-yellow-400 p-4 mt-2 max-w-sm shrink-0 shadow-[4px_4px_0px_0px_#000]">
+                <span class="pill bg-yellow-400 text-black border-black mb-2">${t.cat}</span>
+                <h4 class="font-black text-white text-lg text-shadow-hard mb-1 leading-tight">${t.name}</h4>
+                <a href="${t.link}" target="_blank" class="text-yellow-400 underline font-black text-sm block mt-2">ACCESS TOOL</a>
+            </div>`;
+        };
+
+        window.vote = async function(encodedName) {
+            const rawName = decodeURIComponent(encodedName);
+            const safeId = rawName.replace(/[^a-zA-Z0-9]/g, '_');
+            
+            let localVoted = JSON.parse(localStorage.getItem('my_votes') || '{}');
+            if (localVoted[safeId]) return;
+
+            localVoted[safeId] = true;
+            localStorage.setItem('my_votes', JSON.stringify(localVoted));
+
             window.toolVotes[safeId] = (window.toolVotes[safeId] || 0) + 1;
+            localStorage.setItem('fallback_votes', JSON.stringify(window.toolVotes));
             window.renderTools();
 
-            // Cloud Persist if Available
             if (useCloud && currentUser) {
                 try {
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tool_votes', safeId), { votes: window.toolVotes[safeId] }, { merge: true });
@@ -264,61 +434,140 @@
 
         window.renderForum = function() {
             const list = document.getElementById('threadList');
-            list.innerHTML = window.forumThreads.map(thread => `
+            list.innerHTML = window.forumThreads.map(thread => {
+                
+                let mediaHtml = '';
+                if(thread.mediaData) {
+                    if(thread.mediaType.startsWith('image/')) {
+                        mediaHtml = `<img src="${thread.mediaData}" class="mt-4 max-w-full h-auto border-2 border-black max-h-64 object-contain">`;
+                    } else if(thread.mediaType.startsWith('audio/')) {
+                        mediaHtml = `<audio controls src="${thread.mediaData}" class="mt-4 w-full h-10 rounded-none border-2 border-black"></audio>`;
+                    }
+                }
+                
+                let toolRefHtml = renderMiniToolCard(thread.toolRef);
+
+                return `
                 <div class="bg-[#1e3a8a] p-6 border-2 border-black shadow-[6px_6px_0px_0px_#000] relative">
-                    <h3 class="text-yellow-400 font-black text-2xl mb-1 text-shadow-hard pr-20">${thread.title}</h3>
+                    <h3 class="text-yellow-400 font-black text-2xl mb-1 text-shadow-hard pr-10">${thread.title}</h3>
                     <p class="text-sm font-black text-gray-300 mb-4">BY ${thread.username.toUpperCase()}</p>
-                    <p class="text-white font-bold mb-4 text-shadow-hard">${thread.text}</p>
-                    <div class="replies-container border-l-2 border-yellow-400 pl-4 space-y-2 mb-4">
-                        ${(thread.replies || []).map(r => `
-                            <div class="py-2">
-                                <span class="text-yellow-400 font-black text-shadow-hard">${r.username}:</span>
-                                <span class="text-white font-bold text-shadow-hard">${r.text}</span>
-                            </div>
-                        `).join('')}
+                    
+                    <div class="flex flex-col md:flex-row gap-6 mb-6 items-start">
+                        <div class="flex-1 w-full">
+                            <p class="text-white font-bold text-shadow-hard whitespace-pre-wrap">${thread.text}</p>
+                            ${mediaHtml}
+                        </div>
+                        ${toolRefHtml}
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                        <input type="text" id="replyUser_${thread.id}" placeholder="Username..." class="bg-[#0f172a] p-3 text-white border-2 border-black w-full sm:w-1/4 focus:outline-none search-yellow" style="color: #facc15;">
-                        <input type="text" id="replyText_${thread.id}" placeholder="Add a comment..." class="flex-1 bg-[#0f172a] p-3 text-white border-2 border-black focus:outline-none search-yellow" style="color: #facc15;">
-                        <button onclick="addReply('${thread.id}')" class="bg-yellow-400 text-black px-6 font-black border-2 border-black hover:bg-yellow-500">REPLY</button>
+
+                    <div class="replies-container border-l-4 border-yellow-400 pl-4 space-y-4 mb-6">
+                        ${(thread.replies || []).map(r => {
+                            let rMediaHtml = '';
+                            if(r.mediaData) {
+                                if(r.mediaType.startsWith('image/')) {
+                                    rMediaHtml = `<img src="${r.mediaData}" class="mt-2 max-w-full h-auto border-2 border-black max-h-48 object-contain">`;
+                                } else if(r.mediaType.startsWith('audio/')) {
+                                    rMediaHtml = `<audio controls src="${r.mediaData}" class="mt-2 w-full h-8 rounded-none border-2 border-black"></audio>`;
+                                }
+                            }
+                            let rToolRefHtml = renderMiniToolCard(r.toolRef);
+                            
+                            return `
+                            <div class="bg-[#0f172a] p-4 border-2 border-black relative">
+                                <span class="text-yellow-400 font-black text-shadow-hard mb-1 block">${r.username}:</span>
+                                <div class="flex flex-col md:flex-row gap-4 items-start">
+                                    <div class="flex-1 w-full">
+                                        <span class="text-white font-bold text-shadow-hard whitespace-pre-wrap">${r.text}</span>
+                                        ${rMediaHtml}
+                                    </div>
+                                    ${rToolRefHtml}
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                    
+                    <div class="bg-[#0f172a] p-4 border-2 border-black border-dashed">
+                        <input type="text" id="replyUser_${thread.id}" placeholder="Username..." class="bg-[#1e3a8a] p-3 text-white border-2 border-black w-full mb-2 focus:outline-none search-yellow" style="color: #facc15;">
+                        <textarea id="replyText_${thread.id}" placeholder="Add a comment..." class="w-full bg-[#1e3a8a] p-3 text-white border-2 border-black focus:outline-none mb-2 search-yellow" style="color: #facc15; min-height: 60px;"></textarea>
+                        
+                        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                            <div class="flex-1">
+                                <input type="file" id="replyFile_${thread.id}" accept="image/*, audio/*" class="w-full text-white text-xs font-bold bg-[#1e3a8a] border-2 border-black p-1">
+                            </div>
+                            <div class="flex-1">
+                                <select id="replyToolRef_${thread.id}" class="w-full bg-[#1e3a8a] p-2 text-yellow-400 font-black border-2 border-black focus:outline-none text-xs h-full">
+                                    <option value="">NO TOOL REFERENCED</option>
+                                    ${window.getToolOptionsHTML()}
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="addReply('${thread.id}')" class="w-full bg-yellow-400 text-black px-6 py-3 font-black border-2 border-black hover:bg-yellow-500">POST REPLY</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         };
 
         window.addThread = async function() {
             const title = document.getElementById('threadTitle').value.trim();
             const text = document.getElementById('commentText').value.trim();
-            let username = document.getElementById('threadUsername').value.trim() || 'Anonymous';
-            if(!title || !text) return;
+            const username = document.getElementById('threadUsername').value.trim() || 'Anonymous';
+            const fileInput = document.getElementById('threadFile');
+            const toolRef = document.getElementById('threadToolRef').value;
             
-            const threadData = { title, text, username, createdAt: Date.now(), replies: [] };
+            if(!title || !text) { showMsg("Title and Content are required to start a thread."); return; }
+            
+            let mediaData = null;
+            let mediaType = null;
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if(file.size > 800000) { showMsg("File is too large! Please keep uploads under 800KB."); return; }
+                mediaType = file.type;
+                mediaData = await getBase64(file);
+            }
+            
+            const threadData = { title, text, username, toolRef, mediaData, mediaType, createdAt: Date.now(), replies: [] };
             
             if (useCloud && currentUser) {
                 try {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads'), threadData);
-                    document.getElementById('threadTitle').value = '';
-                    document.getElementById('commentText').value = '';
                 } catch(e) { console.error(e); }
             } else {
                 threadData.id = Date.now().toString();
                 window.forumThreads.unshift(threadData);
+                localStorage.setItem('fallback_forum', JSON.stringify(window.forumThreads));
                 window.renderForum();
-                document.getElementById('threadTitle').value = '';
-                document.getElementById('commentText').value = '';
             }
+            
+            document.getElementById('threadTitle').value = '';
+            document.getElementById('commentText').value = '';
+            fileInput.value = '';
+            document.getElementById('threadToolRef').value = '';
         };
 
         window.addReply = async function(threadId) {
             const userInp = document.getElementById(`replyUser_${threadId}`).value.trim();
             const textInp = document.getElementById(`replyText_${threadId}`).value.trim();
+            const fileInput = document.getElementById(`replyFile_${threadId}`);
+            const toolRef = document.getElementById(`replyToolRef_${threadId}`).value;
             const username = userInp || 'Anonymous';
-            if (!textInp) return;
+            
+            if (!textInp) { showMsg("Reply text cannot be empty."); return; }
+
+            let mediaData = null;
+            let mediaType = null;
+            
+            if (fileInput && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if(file.size > 800000) { showMsg("File is too large! Please keep uploads under 800KB."); return; }
+                mediaType = file.type;
+                mediaData = await getBase64(file);
+            }
 
             const threadIndex = window.forumThreads.findIndex(t => t.id === threadId);
             if (threadIndex === -1) return;
             
-            const newReplies = [...(window.forumThreads[threadIndex].replies || []), { username, text: textInp, createdAt: Date.now() }];
+            const newReplies = [...(window.forumThreads[threadIndex].replies || []), { username, text: textInp, toolRef, mediaData, mediaType, createdAt: Date.now() }];
 
             if (useCloud && currentUser) {
                 try {
@@ -326,6 +575,7 @@
                 } catch(e) { console.error(e); }
             } else {
                 window.forumThreads[threadIndex].replies = newReplies;
+                localStorage.setItem('fallback_forum', JSON.stringify(window.forumThreads));
                 window.renderForum();
             }
         };
@@ -337,11 +587,46 @@
             document.getElementById('btnForum').classList.toggle('btn-active', tab === 'forum');
         };
 
-        const cats = [...new Set(tools.map(t => t.cat))];
-        cats.forEach(c => document.getElementById('categoryFilter').innerHTML += `<option value="${c}">${c}</option>`);
-        
+        // Populate Category and Tool Dropdowns Dynamically
+        window.getToolOptionsHTML = function() {
+            const allTools = [...tools, ...window.addedTools];
+            // sort alphabetically for ease of finding
+            allTools.sort((a,b) => a.name.localeCompare(b.name));
+            return allTools.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+        };
+
+        window.populateToolDropdowns = function() {
+            const allTools = [...tools, ...window.addedTools];
+            
+            // Categories
+            const catSelect = document.getElementById('categoryFilter');
+            const newToolCatSelect = document.getElementById('newToolCatSelect');
+            
+            // Retain default options
+            catSelect.innerHTML = '<option value="All">ALL CATEGORIES</option><option value="Newly Added">--- NEWLY ADDED ---</option>';
+            newToolCatSelect.innerHTML = '<option value="">SELECT CATEGORY...</option><option value="CUSTOM_NEW">--- CREATE NEW CATEGORY ---</option>';
+            
+            const cats = [...new Set(allTools.map(t => t.cat))];
+            cats.forEach(c => {
+                if(c !== 'Newly Added') {
+                    catSelect.innerHTML += `<option value="${c}">${c}</option>`;
+                    newToolCatSelect.innerHTML += `<option value="${c}">${c}</option>`;
+                }
+            });
+
+            // Tool Selectors for Forum
+            const threadToolRef = document.getElementById('threadToolRef');
+            if(threadToolRef) {
+                threadToolRef.innerHTML = '<option value="">NO TOOL REFERENCED</option>' + window.getToolOptionsHTML();
+            }
+            
+            // re-render forum if active to update reply dropdowns
+            window.renderForum();
+        };
+
+        // Init
+        window.populateToolDropdowns();
         window.renderTools();
-        window.renderForum();
     </script>
 </body>
 </html>
