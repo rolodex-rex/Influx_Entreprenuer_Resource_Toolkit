@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influx Entrepreneur Toolkit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #1e293b; color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .tool-card { background: #1e3a8a; border: 3px solid #000; transition: all 0.2s ease; box-shadow: 8px 8px 0px 0px #000; display: flex; flex-direction: column; position: relative; }
+        .tool-card:hover { transform: translateY(-4px); box-shadow: 12px 12px 0px 0px #000; }
+        .pill { font-size: 0.65rem; padding: 2px 8px; border-radius: 9999px; font-weight: 900; text-transform: uppercase; border: 2px solid #000; width: fit-content; min-height: 20px; display: inline-block; }
+        .btn-top { background: #1e3a8a; font-weight: 900; color: white; border: 3px solid #000; box-shadow: 4px 4px 0px #000; }
+        .btn-active { background: #facc15 !important; color: #000 !important; }
+        .btn-tool { background: #facc15; color: #000; font-weight: 900; padding: 12px; border: 3px solid #000; box-shadow: 4px 4px 0px #000; }
+        .text-shadow-hard { text-shadow: 2px 2px 0px #000; }
+        .text-shadow-hero { text-shadow: 6px 6px 0px #000; }
+        .upvote-shadow { filter: drop-shadow(3px 3px 0px #000); }
+        .search-yellow::placeholder { color: #facc15; opacity: 1; }
+    </style>
+</head>
+<body class="p-4 md:p-8 lg:p-12">
+
+    <div class="max-w-7xl mx-auto">
+        <div id="clubhouseModal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-[#1e3a8a] border-4 border-black p-8 max-w-sm w-full shadow-[12px_12px_0px_0px_#000]">
+                <h2 class="text-3xl font-black text-yellow-400 mb-6 text-shadow-hard">👋 CLUBHOUSE</h2>
+                <button onclick="window.open(localStorage.getItem('chLink') || 'https://clubhouse.com', '_blank')" class="w-full bg-yellow-400 p-4 border-2 border-black font-black mb-4 text-black text-xl hover:bg-yellow-500">VISIT ROOM</button>
+                <button onclick="const l = prompt('Enter New Room Link:'); if(l) localStorage.setItem('chLink', l);" class="w-full bg-yellow-400 p-4 border-2 border-black font-black mb-4 text-black text-xl hover:bg-yellow-500">UPDATE LINK</button>
+                <button onclick="document.getElementById('clubhouseModal').classList.add('hidden')" class="w-full bg-red-500 p-4 border-2 border-black font-black text-white text-xl hover:bg-red-600">CLOSE</button>
+            </div>
+        </div>
+
+        <header class="mb-12">
+            <h1 class="text-5xl md:text-7xl font-black text-yellow-400 leading-none text-shadow-hero mb-6">INFLUX ENTREPRENEUR<br>TOOLKIT</h1>
+            <div class="flex flex-wrap gap-3">
+                <button id="btnToolkit" onclick="setTab('toolkit')" class="btn-top px-6 py-3 btn-active">TOOLKIT</button>
+                <button id="btnForum" onclick="setTab('forum')" class="btn-top px-6 py-3">FORUM</button>
+                <button onclick="document.getElementById('clubhouseModal').classList.remove('hidden')" class="btn-top px-6 py-3 text-4xl">👋</button>
+                <a href="https://influxentrepreneur.com" target="_blank" class="btn-top px-6 py-3">INFLUX ENTREPRENEUR</a>
+            </div>
+        </header>
+
+        <div id="toolsSection">
+            <div class="flex flex-col md:flex-row gap-4 mb-8">
+                <input type="text" id="searchInput" onkeyup="renderTools()" placeholder="SEARCH TOOLS..." class="search-yellow flex-1 bg-[#1e3a8a] border-2 border-black p-4 text-yellow-400 font-black shadow-[4px_4px_0px_0px_#000] focus:outline-none" style="color: #facc15;">
+                <select id="categoryFilter" onchange="renderTools()" class="bg-[#1e3a8a] border-2 border-black p-4 text-yellow-400 font-black shadow-[4px_4px_0px_0px_#000] focus:outline-none" style="color: #facc15;">
+                    <option value="All">ALL CATEGORIES</option>
+                </select>
+            </div>
+            <div id="toolGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="forumSection" class="hidden max-w-3xl">
+            <div class="bg-[#1e3a8a] p-8 border-2 border-black shadow-[8px_8px_0px_0px_#000] mb-8">
+                <h2 class="text-2xl font-black text-yellow-400 mb-4 text-shadow-hard">START NEW THREAD</h2>
+                <input id="threadUsername" placeholder="YOUR USERNAME" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none" style="color: #facc15;">
+                <input id="threadTitle" placeholder="TOPIC TITLE" class="search-yellow w-full bg-[#0f172a] p-3 mb-4 text-yellow-400 font-black border-2 border-black focus:outline-none" style="color: #facc15;">
+                <textarea id="commentText" placeholder="YOUR CONTENT..." class="w-full bg-[#0f172a] p-3 mb-4 text-white font-black border-2 border-black h-24 focus:outline-none"></textarea>
+                <button onclick="addThread()" class="btn-tool w-full text-center hover:bg-yellow-500">CREATE THREAD</button>
+            </div>
+            <div id="threadList" class="space-y-6"></div>
+        </div>
+
+        <footer class="mt-20 pt-10 border-t-2 border-black text-center">
+            <p class="font-black text-white text-shadow-hard">CREATED BY: <a href="https://x.com/rolodexrex" target="_blank" class="text-yellow-400 underline font-black">@ROLODEXREX</a></p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const tools = [
+            { name: "CLAUDE COWORK", cat: "AGENTIC FRAMEWORKS", desc: "A personal AI operating system utilizing custom skills and MCP servers to fully automate workflows and act as a maintained workspace.", os: false, link: "https://google.com/search?q=CLAUDE+COWORK" },
+            { name: "School Skill", cat: "SKILLS & MCP SERVERS", desc: "A custom skill used to fully automate school operations, acting as a maintained 'room' inside a personal OS.", os: false, link: "https://google.com/search?q=School+Skill+Automation" },
+            { name: "Website Search Skill", cat: "SKILLS & MCP SERVERS", desc: "A fundamental business skill that allows an AI agent to search and parse a specific company's website.", os: false, link: "https://google.com/search?q=Website+Search+Skill+AI" },
+            { name: "Custom Hosted Skills", cat: "SKILLS & MCP SERVERS", desc: "Specialized skills built and hosted for clients to give their AI systems custom business capabilities.", os: false, link: "https://google.com/search?q=Custom+Hosted+AI+Skills" },
+            { name: "Custom Perplexity Skill", cat: "SKILLS & MCP SERVERS", desc: "A custom MCP server built by stitching together various APIs to create a personal, unified search engine clone of Perplexity.", os: false, link: "https://google.com/search?q=Custom+Perplexity+Search+Aggregator" },
+            { name: "Illustrator MCP Server", cat: "SKILLS & MCP SERVERS", desc: "A proposed or custom MCP server (skill) that connects directly with Adobe Illustrator to automate design and printing workflows.", os: false, link: "https://google.com/search?q=Adobe+Illustrator+MCP+Server" },
+            { name: "MCP Servers", cat: "SKILLS & MCP SERVERS", desc: "The foundational technology behind agentic 'skills,' functioning as enclosable APIs that give models custom capabilities.", os: true, link: "https://modelcontextprotocol.io" },
+            { name: "Custom Print Scripts", cat: "SCRIPTS & LANGUAGES", desc: "Custom-built scripts used to automate and correct dependable layouts in Photoshop, Dreamweaver, and InDesign.", os: false, link: "https://google.com/search?q=Custom+Print+Formatting+Scripts+Adobe" },
+            { name: "Python Web Scraper Scripts", cat: "SCRIPTS & LANGUAGES", desc: "Custom backend scripts built with Python and executed by AI agents to automate data extraction tasks.", os: false, link: "https://google.com/search?q=Custom+Python+Web+Scraper+Scripts" },
+            { name: "Lua, JS, and Python", cat: "SCRIPTS & LANGUAGES", desc: "Programming languages needed to build custom OBS plugins and web scraper scripts.", os: true, link: "https://www.python.org" },
+            { name: "HTML, CSS, PHP, React, Liquid", cat: "SCRIPTS & LANGUAGES", desc: "Structural web coding languages used for 'vibe coding' dynamic WordPress plugins, dashboards, and Shopify stores.", os: true, link: "https://google.com/search?q=HTML+CSS+PHP+React+Liquid" },
+            { name: "Markdown (.md)", cat: "SCRIPTS & LANGUAGES", desc: "The optimal, readable text format used for feeding large datasets (like personal medical files) into Claude.", os: true, link: "https://google.com/search?q=Markdown+Formatting" },
+            { name: "GGUF", cat: "SCRIPTS & LANGUAGES", desc: "The 'butt naked' file format downloaded from repositories like Hugging Face, necessary for running local models completely offline.", os: true, link: "https://google.com/search?q=GGUF+Model+Format" },
+            { name: "Daisy chain", cat: "SCRIPTS & LANGUAGES", desc: "A method of linking or routing multiple local AI models sequentially to perform complex, multi-step tasks.", os: false, link: "https://google.com/search?q=AI+Daisy+Chain+Method" },
+            { name: "B-MAD (Beatmat Method)", cat: "SCRIPTS & LANGUAGES", desc: "A spec-driven agentic framework method used to turn local bots into advanced vibe coding tools.", os: false, link: "https://google.com/search?q=B-MAD+Beatmat+Method+AI" },
+            { name: "Raspberry Pi", cat: "HARDWARE", desc: "A microcomputer heavily used for offline AI systems, gamifying cybersecurity, and learning how to build smart custom tech.", os: true, link: "https://www.raspberrypi.com" },
+            { name: "Arduino", cat: "HARDWARE", desc: "Microcontroller hardware utilized for building and coding custom local tech. Often paired with Raspberry Pi.", os: true, link: "https://www.arduino.cc" },
+            { name: "Nvidia Jetson Nano & Xavier", cat: "HARDWARE", desc: "Powerful compute hardware modules specifically designed to handle demanding edge-computing and local processing tasks.", os: false, link: "https://developer.nvidia.com/embedded-computing" },
+            { name: "AMD Ryzen Halo", cat: "HARDWARE", desc: "A local hardware/chip alternative that competes neck-and-neck with Nvidia, but at a lower price point of around $1,500.", os: false, link: "https://www.amd.com" },
+            { name: "Claude Code", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "A command-line agentic tool that allows Claude to interact directly with codebases, perform file edits, and execute terminal commands.", os: false, link: "https://claude.ai" },
+            { name: "n8n", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "A powerful workflow automation tool used to connect various applications and create complex, structured agentic flows.", os: true, link: "https://n8n.io" },
+            { name: "Open Interpreter", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "An open-source, command-line agent that provides AI models with direct access to a computer's terminal for task execution.", os: true, link: "https://openinterpreter.com" },
+            { name: "AutoGPT, SuperAGI, ChatDev", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "Classic agentic harnesses and frameworks used for building autonomous bots. Can be powered by various models.", os: true, link: "https://agpt.co" },
+            { name: "LangChain and LangSmith", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "Specialized tools used for building multi-agent applications and managing context or 'permanent memory'.", os: true, link: "https://langchain.com" },
+            { name: "Lovable", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "A popular 'vibe coding' tool used for quickly building out web interfaces and coding projects via prompts.", os: false, link: "https://lovable.dev" },
+            { name: "DayD3 (Dade / DYA D3)", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "An open-source, local alternative to Lovable that utilizes savable chat windows for vibe coding HTML and CSS directly.", os: true, link: "https://google.com/search?q=DayD3+Vibe+Coding" },
+            { name: "Open Hermes", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "An open-source agentic framework and model used for managing AI tasks locally or via hubs.", os: true, link: "https://google.com/search?q=Open+Hermes+AI" },
+            { name: "Browser Use & SearchXEngine", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "Tools specifically configured for executing automated searching and web browsing tasks via AI agents.", os: true, link: "https://browser-use.com" },
+            { name: "Self Operating Computer", cat: "AGENTIC FRAMEWORKS & AUTOMATION", desc: "A framework that enables an AI agent to visually perceive and control a computer screen in a manner similar to a human.", os: true, link: "https://google.com/search?q=Self+Operating+Computer+Framework" },
+            { name: "Claude (TERMINAL / Desktop)", cat: "LLMS & AI MODELS", desc: "A highly advanced agentic setup where Claude acts as a personal operating system, managing computer operations.", os: false, link: "https://claude.ai" },
+            { name: "DeepSeek", cat: "LLMS & AI MODELS", desc: "A high-performance AI model recognized for its strong results on industry benchmarks and efficiency in specialized tasks.", os: true, link: "https://deepseek.com" },
+            { name: "Fable 5", cat: "LLMS & AI MODELS", desc: "A highly capable intelligence model/layer powered by Claude/Maven, used for high-level agent tasks.", os: false, link: "https://google.com/search?q=Fable+5+AI" },
+            { name: "GLM 5.2", cat: "LLMS & AI MODELS", desc: "A powerful open-weights AI model that benchmarks closely to DeepSeek and Claude, deployable locally.", os: true, link: "https://google.com/search?q=GLM+5.2+Model" },
+            { name: "Llama 2, Llama 3, Qwen, Gemma", cat: "LLMS & AI MODELS", desc: "Highly capable open-source large language models that can be downloaded and run locally on inference tools.", os: true, link: "https://llama.meta.com" },
+            { name: "ChatGPT / OpenAI / Codex", cat: "LLMS & AI MODELS", desc: "Commercial AI models heavily utilized for simple automations, writing code, and prompt engineering.", os: false, link: "https://chatgpt.com" },
+            { name: "Whisper", cat: "LLMS & AI MODELS", desc: "A specialized local AI model specifically used for generating text transcriptions from audio files efficiently.", os: true, link: "https://google.com/search?q=OpenAI+Whisper" },
+            { name: "LTX2", cat: "LLMS & AI MODELS", desc: "A local AI model explicitly designed to generate high-quality video content. Requires powerful local hardware.", os: true, link: "https://google.com/search?q=LTX2+Video+Generation" },
+            { name: "Sakona Fuju (Sakana AI)", cat: "LLMS & AI MODELS", desc: "A newly discussed Japanese AI model that allegedly benchmarks close to highly capable models like Fable 5.", os: true, link: "https://sakana.ai" },
+            { name: "Gro (Grok)", cat: "LLMS & AI MODELS", desc: "An AI model that 'has like no filter' and ignores policies, making it useful for pulling unrestricted data.", os: true, link: "https://grok.x.ai" },
+            { name: "Voicebox", cat: "LLMS & AI MODELS", desc: "An AI voice generation and speech synthesis model used to create lifelike voice outputs from text.", os: false, link: "https://voicebox.metademolab.com" },
+            { name: "Ollama", cat: "INFERENCE TOOLS & ROUTERS", desc: "A local software inference tool that enables users to run LLMs locally on their own hardware without internet.", os: true, link: "https://ollama.com" },
+            { name: "LM Studio", cat: "INFERENCE TOOLS & ROUTERS", desc: "A user-friendly desktop application designed for discovering, downloading, and running local LLMs via GGUF files.", os: false, link: "https://lmstudio.ai" },
+            { name: "LLM Router", cat: "INFERENCE TOOLS & ROUTERS", desc: "A routing tool used to run and manage multiple local models simultaneously as one unified bot logic system.", os: true, link: "https://google.com/search?q=LLM+Router" },
+            { name: "Open Web UI", cat: "INFERENCE TOOLS & ROUTERS", desc: "A versatile web-based user interface designed for interacting with various open-source AI models and backends.", os: true, link: "https://openwebui.com" },
+            { name: "Odysius", cat: "INFERENCE TOOLS & ROUTERS", desc: "A local AI hub that allows users to compare prompts and outputs across different AI engines simultaneously.", os: true, link: "https://google.com/search?q=Odysius+AI+Hub" },
+            { name: "Llamafile", cat: "INFERENCE TOOLS & ROUTERS", desc: "A method and inference tool used to easily run open-source large language models natively as a single executable file.", os: true, link: "https://github.com/Mozilla-Ocho/llamafile" },
+            { name: "JNAI (Jan AI)", cat: "INFERENCE TOOLS & ROUTERS", desc: "An offline local inference tool used as an alternative to software like LM Studio and Ollama for running offline LLMs.", os: true, link: "https://jan.ai" },
+            { name: "Chat Hub", cat: "INFERENCE TOOLS & ROUTERS", desc: "A browser extension/tool that allows users to run and compare multiple language models side-by-side efficiently.", os: true, link: "https://chathub.gg" },
+            { name: "GoHighLevel (GHL)", cat: "PLATFORMS & SOFTWARE", desc: "A comprehensive white-label CRM and marketing automation platform used for managing business workflows.", os: false, link: "https://gohighlevel.com" },
+            { name: "WordPress", cat: "PLATFORMS & SOFTWARE", desc: "A website content management platform used for building custom, live-editable HTML dashboards and agentic UI endpoints.", os: true, link: "https://wordpress.org" },
+            { name: "Shopify", cat: "PLATFORMS & SOFTWARE", desc: "A leading e-commerce platform that supports automated storefront builds and customizations using Liquid coding.", os: false, link: "https://shopify.com" },
+            { name: "Salesforce, SAP, HubSpot", cat: "PLATFORMS & SOFTWARE", desc: "Enterprise Customer Relationship Management (CRM) platforms that can be managed by AI agents via APIs.", os: false, link: "https://salesforce.com" },
+            { name: "Adobe Suite", cat: "PLATFORMS & SOFTWARE", desc: "Professional creative software used for layouts, vector art, and image editing. Automatable via browser agents.", os: false, link: "https://adobe.com" },
+            { name: "OBS Studio", cat: "PLATFORMS & SOFTWARE", desc: "Free and open-source software for video recording and live streaming, supporting highly customizable workflows via plugins.", os: true, link: "https://obsproject.com" },
+            { name: "ComfyUI", cat: "PLATFORMS & SOFTWARE", desc: "A powerful node-based graphical user interface designed for managing Stable Diffusion and AI video generation pipelines.", os: true, link: "https://comfy.org" },
+            { name: "VS Code", cat: "PLATFORMS & SOFTWARE", desc: "The required integrated development environment (IDE) used for installing and running the Claude Code terminal.", os: true, link: "https://code.visualstudio.com" },
+            { name: "Cursor", cat: "PLATFORMS & SOFTWARE", desc: "An AI-native code editor built on top of VS Code, specifically optimized to assist with programming tasks.", os: false, link: "https://cursor.com" },
+            { name: "Replit", cat: "PLATFORMS & SOFTWARE", desc: "A cloud-based IDE and software creation platform that allows for rapid, collaborative AI-assisted coding.", os: false, link: "https://replit.com" },
+            { name: "NotebookLM", cat: "PLATFORMS & SOFTWARE", desc: "An AI-powered research and writing assistant capable of processing and synthesizing information from long-form documents.", os: false, link: "https://notebooklm.google.com" },
+            { name: "Sandcastle", cat: "PLATFORMS & SOFTWARE", desc: "A specialized utility that enables Claude Code to perform autonomous work for extended periods without frequent check-ins.", os: true, link: "https://google.com/search?q=Sandcastle+Claude+Code" },
+            { name: "Nana Banana (Pro)", cat: "PLATFORMS & SOFTWARE", desc: "An AI tool utilized for dynamic design and video formatting workflows alongside tools like Dreamweaver.", os: false, link: "https://google.com/search?q=Nana+Banana+AI" },
+            { name: "Sticker Shuttle", cat: "PLATFORMS & SOFTWARE", desc: "An AI-powered web platform for sticker proofing that automatically generates precise die-cut lines for shapes.", os: false, link: "https://stickershuttle.com" },
+            { name: "PowerBI", cat: "PLATFORMS & SOFTWARE", desc: "A data interface intelligence platform created by Microsoft, integrating heavily with APIs and sourced datasets.", os: false, link: "https://powerbi.microsoft.com" },
+            { name: "Shadow PC", cat: "PLATFORMS & SOFTWARE", desc: "A cloud-based virtual desktop solution used to run intensive software by overcoming local hardware limitations.", os: false, link: "https://shadow.tech" },
+            { name: "FFmpeg", cat: "PLATFORMS & SOFTWARE", desc: "A powerful command-line tool used for rendering and iteratively editing videos via Claude Code and local terminals.", os: true, link: "https://ffmpeg.org" },
+            { name: "Agentcard.sh", cat: "PLATFORMS & SOFTWARE", desc: "A service that allows users to issue debit or credit cards directly to AI agents with programmed spending limits.", os: false, link: "https://agentcard.sh" },
+            { name: "Maven", cat: "PLATFORMS & SOFTWARE", desc: "A social platform and intelligence network whose background intelligence is powered by Claude.", os: false, link: "https://google.com/search?q=Maven+Platform" },
+            { name: "Telegram", cat: "PLATFORMS & SOFTWARE", desc: "A secure messaging application used as an endpoint for AI automations, often monitored 24/7 by autonomous workflows.", os: true, link: "https://telegram.org" },
+            { name: "Dropbox", cat: "PLATFORMS & SOFTWARE", desc: "A cloud file-hosting service used within automated AI workflows as a trigger point for processing dropped files.", os: false, link: "https://www.dropbox.com" },
+            { name: "Zoom", cat: "PLATFORMS & SOFTWARE", desc: "A popular live-streaming and video communications platform often used as an endpoint during model demonstrations.", os: false, link: "https://zoom.us" },
+            { name: "Linux", cat: "PLATFORMS & SOFTWARE", desc: "An open-source operating system providing the backend required to launch powerful tools like Claude Code on budget hardware.", os: true, link: "https://www.linux.org" },
+            { name: "Siri & Alexa", cat: "PLATFORMS & SOFTWARE", desc: "Internet-dependent, legacy smart home voice assistants slowly being replaced by offline, local models.", os: false, link: "https://www.apple.com/siri/" },
+            { name: "LimeWire", cat: "PLATFORMS & SOFTWARE", desc: "A legacy P2P downloading tool referenced conceptually to explain how Ollama functions for downloading language models.", os: true, link: "https://google.com/search?q=LimeWire" },
+            { name: "ElevenLabs", cat: "PLATFORMS & SOFTWARE", desc: "A highly advanced AI voice synthesis platform used for generating realistic, natural-sounding voiceovers.", os: false, link: "https://elevenlabs.io" },
+            { name: "Open Router", cat: "CLOUD, DATABASES & APIS", desc: "A unified API gateway that provides access to hundreds of AI models from various providers through a single integration.", os: false, link: "https://openrouter.ai" },
+            { name: "Hugging Face", cat: "CLOUD, DATABASES & APIS", desc: "A massive central repository and community platform for hosting open-source AI models, datasets, and demos.", os: false, link: "https://huggingface.co" },
+            { name: "Qdrant", cat: "CLOUD, DATABASES & APIS", desc: "A high-performance vector database used for providing permanent AI memory and conducting efficient similarity searches.", os: true, link: "https://qdrant.tech" },
+            { name: "SQL Database", cat: "CLOUD, DATABASES & APIS", desc: "A database system used to provide structured, interchangeable memory for AI agents alongside n8n.", os: true, link: "https://google.com/search?q=SQL+Database" },
+            { name: "LangGraph", cat: "CLOUD, DATABASES & APIS", desc: "A specialized library for building stateful, multi-agent applications with LLMs, specifically providing 'permanent memory'.", os: true, link: "https://google.com/search?q=LangGraph" },
+            { name: "AWS (Amazon Web Services)", cat: "CLOUD, DATABASES & APIS", desc: "A massive cloud hosting platform utilized for custom AI architectures, server renting, and complex deployments.", os: false, link: "https://aws.amazon.com" },
+            { name: "Vercel", cat: "CLOUD, DATABASES & APIS", desc: "A cloud platform for frontend developers designed to deploy and host web projects with high performance and global scaling.", os: false, link: "https://vercel.com" },
+            { name: "RunPod", cat: "CLOUD, DATABASES & APIS", desc: "A cloud compute service where users can rent GPUs and pay for minutes to run large AI models as a scalable alternative.", os: false, link: "https://www.runpod.io" },
+            { name: "Petals AI", cat: "CLOUD, DATABASES & APIS", desc: "A decentralized, 'LLM torrent-style' network used to distribute and run model computing across multiple computers simultaneously.", os: true, link: "https://petals.dev" },
+            { name: "Docker Desktop", cat: "CLOUD, DATABASES & APIS", desc: "A desktop-based GUI environment used for managing, building, and running containerized applications and AI services.", os: false, link: "https://docker.com" },
+            { name: "Google Deep Research / Perplexity", cat: "CLOUD, DATABASES & APIS", desc: "Advanced APIs and agents used for multi-site automated search aggregation, stitched together via MCP servers.", os: false, link: "https://google.com/search?q=Google+Deep+Research+Perplexity+API" },
+            { name: "Google Analytics", cat: "CLOUD, DATABASES & APIS", desc: "A web analytics service that was successfully analyzed and deciphered using artificial intelligence capabilities.", os: false, link: "https://google.com/search?q=Google+Analytics" },
+            { name: "Google Sheets", cat: "CLOUD, DATABASES & APIS", desc: "A cloud-based spreadsheet tool used to store data, notably acting as an automated backup destination for agent workflows.", os: false, link: "https://sheets.google.com" },
+            { name: "Google Maps & Gmail", cat: "CLOUD, DATABASES & APIS", desc: "Everyday mapping and email tools actively scraped and automated by n8n agents to find leads and send cold outreach.", os: false, link: "https://maps.google.com" },
+            { name: "Google TTS and SST", cat: "CLOUD, DATABASES & APIS", desc: "Text-to-Speech and Speech-to-Text tools integrated with framework methods to allow voice-activated app building.", os: false, link: "https://cloud.google.com/speech-to-text" },
+            { name: "Yelp API", cat: "CLOUD, DATABASES & APIS", desc: "An application programming interface used to aggregate local business data for custom research platforms.", os: false, link: "https://fusion.yelp.com" },
+            { name: "Yahoo API", cat: "CLOUD, DATABASES & APIS", desc: "A search API utilized by developers to bypass standard Google limitations for comprehensive multi-site deep research tools.", os: false, link: "https://developer.yahoo.com" },
+            { name: "Bing API", cat: "CLOUD, DATABASES & APIS", desc: "Microsoft's search API, leveraged by agents for automated internet searching alongside other search endpoints.", os: false, link: "https://google.com/search?q=Bing+Search+API" },
+            { name: "Google Search API", cat: "CLOUD, DATABASES & APIS", desc: "Google's primary search endpoint used to query the broader web programmatically via custom MCP servers.", os: false, link: "https://google.com/search?q=Google+Search+API" },
+            { name: "Pinterest API", cat: "CLOUD, DATABASES & APIS", desc: "An interface to pull image and pin data from the Pinterest platform for highly specialized custom data extraction.", os: false, link: "https://developers.pinterest.com" },
+            { name: "YouTube API", cat: "CLOUD, DATABASES & APIS", desc: "A free API endpoint that allows AI frameworks to scan and retrieve YouTube video and channel data seamlessly.", os: false, link: "https://developers.google.com/youtube/" },
+            { name: "Kaggle", cat: "CLOUD, DATABASES & APIS", desc: "A platform and repository used specifically as a 'plug' for sourcing diverse data sets to connect to BI interfaces.", os: false, link: "https://kaggle.com" },
+            { name: "Helium Network (HNT)", cat: "CLOUD, DATABASES & APIS", desc: "A decentralized network whose nodes are occasionally exploited in rentals by users passively mining crypto.", os: true, link: "https://www.helium.com" },
+            { name: "Nvidia Developer Program", cat: "CLOUD, DATABASES & APIS", desc: "A free developer platform that grants users access to high-end GPUs, agents, and testing environments.", os: false, link: "https://developer.nvidia.com" },
+            { name: "The Simple Claude Cowork OS", cat: "EDUCATIONAL RESOURCES", desc: "A 20-minute YouTube onboarding video resource teaching users how to set up a simple Claude operating system using custom skills.", os: false, link: "https://youtu.be/NjYZW-1bLMo" },
+            { name: "INTERACTIVE CLAUDE FULL COURSE", cat: "EDUCATIONAL RESOURCES", desc: "A comprehensive 4-hour video masterclass explaining how to build, automate, and sell a personal AI operating system.", os: false, link: "https://youtu.be/KTEe5705RHw" }
+        ];
+
+        window.toolVotes = {};
+        window.forumThreads = [];
+        
+        let currentUser = null;
+        let db, auth, appId;
+        let useCloud = false;
+
+        // Initialize Real-Time Database Connection
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                useCloud = true;
+                
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'tool_votes'), (snapshot) => {
+                            snapshot.docs.forEach(d => { window.toolVotes[d.id] = d.data().votes || 0; });
+                            window.renderTools();
+                        }, (e) => console.error(e));
+                        
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads'), (snapshot) => {
+                            window.forumThreads = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                            window.forumThreads.sort((a, b) => b.createdAt - a.createdAt);
+                            window.renderForum();
+                        }, (e) => console.error(e));
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Cloud infrastructure not found. Using local session data.");
+        }
+
+        window.renderTools = function() {
+            const grid = document.getElementById('toolGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cat = document.getElementById('categoryFilter').value;
+            
+            grid.innerHTML = tools.filter(t => (cat === 'All' || t.cat === cat) && (t.name.toLowerCase().includes(search))).map((t) => {
+                const safeId = t.name.replace(/[^a-zA-Z0-9]/g, '_');
+                const votes = window.toolVotes[safeId] || 0;
+                const idx = tools.findIndex(x => x.name === t.name);
+
+                return `
+                <div class="tool-card p-5 relative">
+                    <button onclick="vote(${idx})" class="absolute top-4 right-4 text-white font-black text-3xl upvote-shadow z-10 hover:scale-110 transition-transform ${votes > 0 ? 'text-red-500' : ''}">♥ <span class="text-xl">${votes}</span></button>
+                    <div class="flex flex-col gap-2 mb-4 h-12 pr-16">
+                        <span class="pill bg-yellow-400 text-black border-black">${t.cat}</span>
+                        ${t.os ? '<span class="pill bg-[#5b21b6] text-white border-black">OPEN SOURCE</span>' : '<span class="pill bg-[#1e3a8a] border-black opacity-0"></span>'}
+                    </div>
+                    <h3 class="font-black text-2xl text-white mb-3 text-shadow-hard leading-tight pr-16">${t.name}</h3>
+                    <p class="text-white text-sm font-bold opacity-100 mb-6 flex-grow text-shadow-hard min-h-[3rem] leading-relaxed">${t.desc}</p>
+                    <a href="${t.link}" target="_blank" class="btn-tool text-center block mt-auto hover:bg-yellow-500">ACCESS TOOL</a>
+                </div>
+            `}).join('');
+        };
+
+        window.vote = async function(idx) {
+            const t = tools[idx];
+            const safeId = t.name.replace(/[^a-zA-Z0-9]/g, '_');
+            
+            // Optimistic UI Update
+            window.toolVotes[safeId] = (window.toolVotes[safeId] || 0) + 1;
+            window.renderTools();
+
+            // Cloud Persist if Available
+            if (useCloud && currentUser) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tool_votes', safeId), { votes: window.toolVotes[safeId] }, { merge: true });
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        window.renderForum = function() {
+            const list = document.getElementById('threadList');
+            list.innerHTML = window.forumThreads.map(thread => `
+                <div class="bg-[#1e3a8a] p-6 border-2 border-black shadow-[6px_6px_0px_0px_#000] relative">
+                    <h3 class="text-yellow-400 font-black text-2xl mb-1 text-shadow-hard pr-20">${thread.title}</h3>
+                    <p class="text-sm font-black text-gray-300 mb-4">BY ${thread.username.toUpperCase()}</p>
+                    <p class="text-white font-bold mb-4 text-shadow-hard">${thread.text}</p>
+                    <div class="replies-container border-l-2 border-yellow-400 pl-4 space-y-2 mb-4">
+                        ${(thread.replies || []).map(r => `
+                            <div class="py-2">
+                                <span class="text-yellow-400 font-black text-shadow-hard">${r.username}:</span>
+                                <span class="text-white font-bold text-shadow-hard">${r.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <input type="text" id="replyUser_${thread.id}" placeholder="Username..." class="bg-[#0f172a] p-3 text-white border-2 border-black w-full sm:w-1/4 focus:outline-none search-yellow" style="color: #facc15;">
+                        <input type="text" id="replyText_${thread.id}" placeholder="Add a comment..." class="flex-1 bg-[#0f172a] p-3 text-white border-2 border-black focus:outline-none search-yellow" style="color: #facc15;">
+                        <button onclick="addReply('${thread.id}')" class="bg-yellow-400 text-black px-6 font-black border-2 border-black hover:bg-yellow-500">REPLY</button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.addThread = async function() {
+            const title = document.getElementById('threadTitle').value.trim();
+            const text = document.getElementById('commentText').value.trim();
+            let username = document.getElementById('threadUsername').value.trim() || 'Anonymous';
+            if(!title || !text) return;
+            
+            const threadData = { title, text, username, createdAt: Date.now(), replies: [] };
+            
+            if (useCloud && currentUser) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads'), threadData);
+                    document.getElementById('threadTitle').value = '';
+                    document.getElementById('commentText').value = '';
+                } catch(e) { console.error(e); }
+            } else {
+                threadData.id = Date.now().toString();
+                window.forumThreads.unshift(threadData);
+                window.renderForum();
+                document.getElementById('threadTitle').value = '';
+                document.getElementById('commentText').value = '';
+            }
+        };
+
+        window.addReply = async function(threadId) {
+            const userInp = document.getElementById(`replyUser_${threadId}`).value.trim();
+            const textInp = document.getElementById(`replyText_${threadId}`).value.trim();
+            const username = userInp || 'Anonymous';
+            if (!textInp) return;
+
+            const threadIndex = window.forumThreads.findIndex(t => t.id === threadId);
+            if (threadIndex === -1) return;
+            
+            const newReplies = [...(window.forumThreads[threadIndex].replies || []), { username, text: textInp, createdAt: Date.now() }];
+
+            if (useCloud && currentUser) {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'forum_threads', threadId), { replies: newReplies });
+                } catch(e) { console.error(e); }
+            } else {
+                window.forumThreads[threadIndex].replies = newReplies;
+                window.renderForum();
+            }
+        };
+
+        window.setTab = function(tab) {
+            document.getElementById('toolsSection').classList.toggle('hidden', tab !== 'toolkit');
+            document.getElementById('forumSection').classList.toggle('hidden', tab !== 'forum');
+            document.getElementById('btnToolkit').classList.toggle('btn-active', tab === 'toolkit');
+            document.getElementById('btnForum').classList.toggle('btn-active', tab === 'forum');
+        };
+
+        const cats = [...new Set(tools.map(t => t.cat))];
+        cats.forEach(c => document.getElementById('categoryFilter').innerHTML += `<option value="${c}">${c}</option>`);
+        
+        window.renderTools();
+        window.renderForum();
+    </script>
+</body>
+</html>
